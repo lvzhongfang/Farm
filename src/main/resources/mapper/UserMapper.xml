@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.farm.system.dao.UserMapper">
+
+	<resultMap type="User" id="user">
+		<id property="id" column="id" />
+		<result property="pwd" column="pwd" />
+		<result property="salt" column="salt" />
+		<result property="userNo" column="user_no" />
+		<result property="userName" column="user_name" />
+		<result property="phoneNo" column="phone_no" />
+		<result property="sex" column="sex" />
+		<result property="birth" column="birth" />
+		<result property="email" column="email" />
+		<result property="pwdErrorTime" column="pwd_error_time" />
+		<result property="status" column="status" />
+		<result property="avatar" column="avatar" />
+		<result property="createTime" column="create_time" />
+		<result property="createUser" column="create_user" />
+		<result property="modifyTime" column="modify_time" />
+		<result property="modifyUser" column="modify_user" />
+	</resultMap>
+
+	<sql id="objColumn">
+		a.id,
+		a.user_name,
+		a.pwd,
+		a.salt,
+		a.user_no,
+		a.phone_no,
+		a.sex,
+		a.birth,
+		a.email,
+		a.pwd_error_time,
+		a.status,
+		a.avatar,
+		a.create_time,
+		a.create_user,
+		a.modify_time,
+		a.modify_user
+	</sql>
+	<!-- 不包含salt -->
+	<sql id="listColumn">
+		a.id,
+		a.pwd,
+		a.user_name,
+		a.user_no,
+		a.phone_no,
+		a.sex,
+		a.birth,
+		a.email,
+		a.pwd_error_time,
+		a.status,
+		a.avatar,
+		a.create_time,
+		a.create_user,
+		a.modify_time,
+		a.modify_user
+	</sql>
+
+	<!-- 分页查询 -->
+	<select id="find" parameterType="map" resultMap="user">
+		select
+		<include refid="listColumn" />
+		from t_user a
+		<where>
+			<if test="userNo != null">
+				and a.user_no = #{userNo,jdbcType=VARCHAR}
+			</if>
+			<if test="firstName != null">
+				and a.first_name like #{firstName,jdbcType=VARCHAR}
+			</if>
+			<if test="phoneNo != null">
+				and a.phone_no = #{phoneNo,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="status != null">
+				and a.status = #{status,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by a.user_no asc 
+		limit #{begin,jdbcType=NUMERIC} , #{size,jdbcType=NUMERIC}
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="list" parameterType="map" resultMap="user">
+		select
+		<include refid="listColumn" />
+		from t_user a
+		<where>
+			<if test="userNo != null">
+				and a.user_no = #{userNo,jdbcType=VARCHAR}
+			</if>
+			<if test="firstName != null">
+				and a.user_name like #{userName,jdbcType=VARCHAR}
+			</if>
+			<if test="phoneNo != null">
+				and a.phone_no = #{phoneNo,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="status != null">
+				and a.status = #{status,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by a.user_no asc
+	</select>
+
+	<!-- 根据条件查询记录条数 -->
+	<select id="count" parameterType="map" resultType="Integer">
+		select count(*) from t_user a
+		<where>
+			<if test="userNo != null">
+				and a.user_no = #{userNo,jdbcType=VARCHAR}
+			</if>
+			<if test="firstName != null">
+				and a.user_name like #{userName,jdbcType=VARCHAR}
+			</if>
+			<if test="phoneNo != null">
+				and a.phone_no = #{phoneNo,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="status != null">
+				and a.status = #{status,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<!-- 按ID查询记录 -->
+	<select id="get" resultMap="user" parameterType="Long">
+		select
+		<include refid="listColumn" />
+		from t_user a
+		where a.id = #{id,jdbcType=NUMERIC}
+	</select>
+
+	<select id="findByNo" resultMap="user" parameterType="String">
+		select
+		<include refid="objColumn" />
+		from t_user a
+		where a.user_no = #{userNo,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="findByNoAndPwd" resultMap="user" parameterType="String">
+		select
+		<include refid="listColumn" />
+		from t_user a
+		where a.user_no = #{userNo,jdbcType=VARCHAR}
+		and a.pwd = #{pwd,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="add" parameterType="User">
+		insert into t_user(
+			pwd,
+			salt,
+			user_no,
+			user_name,
+			phone_no,
+			sex,
+			city_no,
+			email,
+			pwd_error_time,
+			status,
+			avatar,
+			create_time,
+			create_user,
+			modify_time,
+			modify_user)
+		values(
+		#{pwd,jdbcType=VARCHAR},
+		#{salt,jdbcType=VARCHAR},
+		#{userNo,jdbcType=VARCHAR},
+		#{userName,jdbcType=VARCHAR},
+		#{phoneNo,jdbcType=VARCHAR},
+		#{sex,jdbcType=VARCHAR},
+		#{birth,jdbcType=TIMESTAMP},
+		#{email,jdbcType=VARCHAR},
+		#{pwdErrorTime,jdbcType=NUMERIC},
+		#{status,jdbcType=VARCHAR},
+		#{avatar,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{createUser,jdbcType=VARCHAR},
+		#{modifyTime,jdbcType=TIMESTAMP},
+		#{modifyUser,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="update" parameterType="map">
+		update t_user set 
+		modify_time = current_timestamp()  
+		<if test="modifyUser != null">
+			,modify_user = #{modifyUser,jdbcType=VARCHAR} 
+		</if>
+		<if test="userName != null">
+			,user_name = #{userName,jdbcType=VARCHAR} 
+		</if>
+		<if test="avatar != null">
+			,avatar = #{avatar,jdbcType=VARCHAR} 
+		</if>
+		<if test="pwd != null">
+			,pwd = #{pwd,jdbcType=VARCHAR} 
+		</if>
+		<if test="birth != null">
+			,birth = #{birth,jdbcType=TIMESTAMP} 
+		</if>
+		<if test="sex != null">
+			,sex = #{sex,jdbcType=VARCHAR} 
+		</if>
+		<if test="email != null">
+			,email = #{email,jdbcType=VARCHAR} 
+		</if>
+		<if test="phoneNo != null">
+			,phone_no = #{phoneNo,jdbcType=VARCHAR} 
+		</if>
+		<if test="status != null">
+			,status = #{status,jdbcType=VARCHAR} 
+		</if>
+		where id = #{id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="delete" parameterType="Long">
+		delete from t_user 
+		where id = #{id,jdbcType=NUMERIC}
+	</delete>
+	
+	<!-- get all user by farmNo -->
+	<select id="findByFarmNo" parameterType="String" resultMap="user">
+		select
+		<include refid="objColumn" />
+		from t_user a,t_farm b,t_farm_user c 
+		where a.user_no = c.user_no 
+		and b.farm_no = c.farm_no 
+		and b.farm_no = #{farmNo,jdbcType=VARCHAR}
+		order by a.id asc
+	</select>
+</mapper>

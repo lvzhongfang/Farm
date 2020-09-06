@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.farm.system.dao.RoleMapper">
+
+	<resultMap type="Role" id="role">
+		<id property="id" column="id" />
+		<result property="roleNo" column="role_no" />
+		<result property="roleName" column="role_name" />
+		<result property="status" column="status" />
+		<result property="createTime" column="create_time" />
+		<result property="createUser" column="create_user" />
+		<result property="modifyTime" column="modify_time" />
+		<result property="modifyUser" column="modify_user" />
+	</resultMap>
+
+	<sql id="objColumn">
+		a.id,
+		a.role_no,
+		a.role_name,
+		a.status,
+		a.create_time,
+		a.create_user,
+		a.modify_time,
+		a.modify_user
+	</sql>
+
+	<!-- 分页查询 -->
+	<select id="find" parameterType="map" resultMap="role">
+		select
+		<include refid="objColumn" />
+		from t_role a
+		<where>
+			<if test="roleNo != null">
+				and a.role_no = #{roleNo,jdbcType=VARCHAR}
+			</if>
+			<if test="roleName != null">
+				and a.role_name like #{roleName,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="status != null">
+				and a.status = #{status,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by a.role_no asc 
+		limit #{begin,jdbcType=NUMERIC} , #{size,jdbcType=NUMERIC}
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="list" parameterType="map" resultMap="role">
+		select
+		<include refid="objColumn" />
+		from t_role a
+		<where>
+			<if test="roleNo != null">
+				and a.role_no = #{roleNo,jdbcType=VARCHAR}
+			</if>
+			<if test="roleName != null">
+				and a.role_name LIKE #{roleName,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="status != null">
+				and a.status = #{status,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by a.role_no asc
+	</select>
+
+	<!-- 根据条件查询记录条数 -->
+	<select id="count" parameterType="map" resultType="Integer">
+		select count(*) from t_role a
+		<where>
+			<if test="roleNo != null">
+				and a.role_no = #{roleNo,jdbcType=VARCHAR}
+			</if>
+			<if test="roleName != null">
+				and a.role_name LIKE #{roleName,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="status != null">
+				and a.status = #{status,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<!-- 按ID查询记录 -->
+	<select id="get" resultMap="role" parameterType="Long">
+		select
+		<include refid="objColumn" />
+		from t_role a
+		where a.id = #{id,jdbcType=NUMERIC}
+	</select>
+
+	<select id="findByNo" resultMap="role" parameterType="String">
+		select
+		<include refid="objColumn" />
+		from t_role a
+		where a.role_no = #{roleNo,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="add" parameterType="Role">
+		insert into t_role(
+			role_no,
+			role_name,
+			status,
+			create_time,
+			create_user,
+			modify_time,
+			modify_user)
+		values(
+		#{roleNo,jdbcType=VARCHAR},
+		#{roleName,jdbcType=VARCHAR},
+		#{status,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{createUser,jdbcType=VARCHAR},
+		#{modifyTime,jdbcType=TIMESTAMP},
+		#{modifyUser,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="update" parameterType="map">
+		update t_role set 
+		update_time = current_timestamp()  
+		<if test="modifyUser != null">
+			,modify_user = #{modifyUser,jdbcType=VARCHAR} 
+		</if>
+		<if test="roleName != null">
+			,role_name = #{roleName,jdbcType=VARCHAR} 
+		</if>
+		<if test="status != null">
+			,status = #{status,jdbcType=VARCHAR} 
+		</if>
+		where id = #{id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="delete" parameterType="Long">
+		delete from t_role 
+		where id = #{id,jdbcType=NUMERIC}
+	</delete>
+	
+	<!-- get all role by userNo -->
+	<select id="findByUserNo" parameterType="String" resultMap="role">
+		select
+		<include refid="objColumn" />
+		from t_role a,t_user b,t_user_role c 
+		where a.role_no = c.role_no 
+		and b.user_no = c.user_no 
+		and b.user_no = #{userNo,jdbcType=VARCHAR}
+		order by a.id asc
+	</select>
+	
+</mapper>

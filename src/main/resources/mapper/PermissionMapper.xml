@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.farm.system.dao.PermissionMapper">
+
+	<resultMap type="Permission" id="permission">
+		<id property="id" column="id" />
+		<result property="permNo" column="perm_no" />
+		<result property="permType" column="perm_type" />
+		<result property="createTime" column="create_time" />
+		<result property="createUser" column="create_user" />
+		<result property="modifyTime" column="modify_time" />
+		<result property="modifyUser" column="modify_user" />
+	</resultMap>
+
+	<sql id="objColumn">
+		a.id,
+		a.perm_no,
+		a.perm_type,
+		a.create_time,
+		a.create_user,
+		a.modify_time,
+		a.modify_user
+	</sql>
+	<!-- 分页查询 -->
+	<select id="find" parameterType="map" resultMap="permission">
+		select
+		<include refid="objColumn" />
+		from t_permission a
+		<where>
+			<if test="permNo != null">
+				and a.perm_no = #{permNo,jdbcType=VARCHAR}
+			</if>
+			<if test="permType != null">
+				and a.perm_type = #{permType,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+		</where>
+		order by a.id asc 
+		limit #{begin,jdbcType=NUMERIC} , #{size,jdbcType=NUMERIC}
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="list" parameterType="map" resultMap="permission">
+		select
+		<include refid="objColumn" />
+		from t_permission a
+		<where>
+			<if test="permNo != null">
+				and a.perm_no = #{permNo,jdbcType=VARCHAR}
+			</if>
+			<if test="permType != null">
+				and a.perm_type = #{permType,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+		</where>
+		order by a.id asc
+	</select>
+
+	<!-- 根据条件查询记录条数 -->
+	<select id="count" parameterType="map" resultType="Integer">
+		select count(*) from t_permission a
+		<where>
+			<if test="permNo != null">
+				and a.perm_no = #{permNo,jdbcType=VARCHAR}
+			</if>
+			<if test="permType != null">
+				and a.perm_type = #{permType,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+		</where>
+	</select>
+
+	<!-- 按ID查询记录 -->
+	<select id="get" resultMap="permission" parameterType="Long">
+		select
+		<include refid="objColumn" />
+		from t_permission a
+		where a.id = #{id,jdbcType=NUMERIC}
+	</select>
+
+	<select id="findByNo" resultMap="permission" parameterType="String">
+		select
+		<include refid="objColumn" />
+		from t_permission a
+		where a.oper_no = #{operNo,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="add" parameterType="Permission">
+		insert into t_permission(
+			perm_no,
+			perm_type,
+			create_time,
+			create_user,
+			modify_time,
+			modify_user)
+		values(
+		#{permNo,jdbcType=VARCHAR},
+		#{permType,jdbcType=NUMERIC},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{createUser,jdbcType=VARCHAR},
+		#{modifyTime,jdbcType=TIMESTAMP},
+		#{modifyUser,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="update" parameterType="map">
+		update t_permission set 
+		modify_time = current_timestamp()  
+		<if test="modifyUser != null">
+			,modify_user = #{modifyUser,jdbcType=VARCHAR} 
+		</if>
+		<if test="permType != null">
+			,perm_type = #{permType,jdbcType=NUMERIC} 
+		</if>
+		where id = #{id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="delete" parameterType="Long">
+		delete from t_permission 
+		where id = #{id,jdbcType=NUMERIC}
+	</delete>
+	
+	<!-- get all permission by roleNos -->
+	<select id="findByRoleNos" parameterType="List" resultMap="permission">
+		select
+		<include refid="objColumn" />
+		from t_permission a,t_role_permission b 
+		where a.perm_no = b.perm_no 
+		and b.role_no in 
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+             #{item}
+        </foreach>
+		order by a.id asc
+	</select>
+</mapper>

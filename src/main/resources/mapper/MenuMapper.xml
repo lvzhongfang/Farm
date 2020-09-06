@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.farm.system.dao.MenuMapper">
+
+	<resultMap type="Menu" id="menu">
+		<id property="id" column="id" />
+		<result property="menuName" column="menu_name" />
+		<result property="menuNo" column="menu_no" />
+		<result property="pno" column="p_no" />
+		<result property="url" column="url" />
+		<result property="icon" column="icon" />
+		<result property="idx" column="idx" />
+		<result property="component" column="comp" />
+		<result property="createTime" column="create_time" />
+		<result property="createUser" column="create_user" />
+		<result property="modifyTime" column="modify_time" />
+		<result property="modifyUser" column="modify_user" />
+	</resultMap>
+
+	<sql id="objColumn">
+		a.id,
+		a.menu_name,
+		a.menu_no,
+		a.p_no,
+		a.url,
+		a.icon,
+		a.idx,
+		a.comp,
+		a.create_time,
+		a.create_user,
+		a.modify_time,
+		a.modify_user
+	</sql>
+
+	<!-- 分页查询 -->
+	<select id="find" parameterType="map" resultMap="menu">
+		select
+		<include refid="objColumn" />
+		from t_menu a
+		<where>
+			<if test="menuNo != null">
+				and a.menu_no = #{menuNo,jdbcType=VARCHAR}
+			</if>
+			<if test="menuName != null">
+				and a.menu_name like #{menuName,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="pno != null">
+				and a.p_no = #{pno,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by a.idx asc 
+		limit #{begin,jdbcType=NUMERIC} , #{size,jdbcType=NUMERIC}
+	</select>
+
+	<!-- 根据条件查询记录 -->
+	<select id="list" parameterType="map" resultMap="menu">
+		select
+		<include refid="objColumn" />
+		from t_menu a
+		<where>
+			<if test="menuNo != null">
+				and a.menu_no = #{menuNo,jdbcType=VARCHAR}
+			</if>
+			<if test="menuName != null">
+				and a.menu_name like #{menuName,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="pno != null">
+				and a.p_no = #{pno,jdbcType=VARCHAR}
+			</if>
+		</where>
+		order by a.idx asc
+	</select>
+
+	<!-- 根据条件查询记录条数 -->
+	<select id="count" parameterType="map" resultType="Integer">
+		select count(*) from t_menu a
+		<where>
+			<if test="menuNo != null">
+				and a.menu_no = #{menuNo,jdbcType=VARCHAR}
+			</if>
+			<if test="menuName != null">
+				and a.menu_name like #{menuName,jdbcType=VARCHAR}
+			</if>
+			<if test="beginD != null">
+				and <![CDATA[ a.create_time >= #{beginD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="endD != null">
+				and <![CDATA[ a.create_time <= #{endD,jdbcType=TIMESTAMP} ]]>
+			</if>
+			<if test="pno != null">
+				and a.p_no = #{pno,jdbcType=VARCHAR}
+			</if>
+		</where>
+	</select>
+
+	<!-- 按ID查询记录 -->
+	<select id="get" resultMap="menu" parameterType="Long">
+		select
+		<include refid="objColumn" />
+		from t_menu a
+		where a.id = #{id,jdbcType=NUMERIC}
+	</select>
+
+	<select id="findByNo" resultMap="menu" parameterType="String">
+		select
+		<include refid="objColumn" />
+		from t_menu a
+		where a.menu_no = #{menuNo,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="add" parameterType="Menu">
+		insert into t_menu(
+			menu_name,
+			menu_no,
+			p_no,
+			url,
+			icon,
+			idx,
+			comp,
+			create_time,
+			create_user,
+			modify_time,
+			modify_user)
+		values(
+		#{menuName,jdbcType=VARCHAR},
+		#{menuNo,jdbcType=VARCHAR},
+		#{pno,jdbcType=VARCHAR},
+		#{url,jdbcType=VARCHAR},
+		#{icon,jdbcType=VARCHAR},
+		#{idx,jdbcType=NUMERIC},
+		#{component,jdbcType=VARCHAR},
+		#{createTime,jdbcType=TIMESTAMP},
+		#{createUser,jdbcType=VARCHAR},
+		#{modifyTime,jdbcType=TIMESTAMP},
+		#{modifyUser,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="update" parameterType="map">
+		update t_menu set 
+		update_time = current_timestamp()  
+		<if test="modifyUser != null">
+			,modify_user = #{modifyUser,jdbcType=VARCHAR} 
+		</if>
+		<if test="roleName != null">
+			,menu_name = #{menuName,jdbcType=VARCHAR} 
+		</if>
+		<if test="status != null">
+			,status = #{status,jdbcType=VARCHAR} 
+		</if>
+		where id = #{id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="delete" parameterType="Long">
+		delete from t_menu 
+		where id = #{id,jdbcType=NUMERIC}
+	</delete>
+	
+	<!-- get all menu by permission no -->
+	<select id="findByPermNos" parameterType="List" resultMap="menu">
+		select
+		<include refid="objColumn" />
+		from t_menu a,t_permission b,t_permission_menu c 
+		where a.menu_no = c.menu_no 
+		and b.perm_no = c.perm_no 
+		and b.perm_no in
+		<foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+             #{item}
+        </foreach>
+		order by a.id asc
+	</select>
+</mapper>
