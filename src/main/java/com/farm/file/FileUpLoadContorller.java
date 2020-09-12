@@ -6,6 +6,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.farm.system.controller.UserController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +25,8 @@ import com.farm.utils.FileUtils;
 @RequestMapping(value="file")
 public class FileUpLoadContorller {
 
+	private static Logger logger = LoggerFactory.getLogger(FileUpLoadContorller.class);
+
 	@Value("${file.uploadFolder}")
 	private String uploadFolder;
 	
@@ -29,13 +34,12 @@ public class FileUpLoadContorller {
 	@PostMapping("/upload")
 	@ResponseBody
 	public Object upload(HttpServletRequest request1,MultipartHttpServletRequest request) throws IOException {
-		String ctxPath = request1.getSession().getServletContext()
-				.getRealPath("/");
-		System.out.println(ctxPath);
+		String ctxPath = request1.getSession().getServletContext().getRealPath("/");
+		logger.info("context path is {}", ctxPath);
 		List<MultipartFile> files = request.getFiles("file");
 		if (files.size() > 0) {
 			for (MultipartFile multipartFile : files) {
-				System.out.println(multipartFile);
+				logger.debug("file name is {}", multipartFile);
 				handleFileUpload(multipartFile,request);
 			}
 		}
